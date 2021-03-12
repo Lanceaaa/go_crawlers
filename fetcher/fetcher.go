@@ -3,13 +3,14 @@ package fetcher
 import (
 	"bufio"
 	"fmt"
-	"io"
+	"golang.org/x/net/html/charset"
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
+	_ "io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"golang.org/x/text/encoding"
-	"golang.org/x/text/transform"
-	"golang.org/x/net/html/charset"
 )
 
 func Fetch(url string) ([]byte, error) {
@@ -23,7 +24,8 @@ func Fetch(url string) ([]byte, error) {
 		return nil, fmt.Errorf("wrong status code: %d", resp.StatusCode)
 	}
 
-	e := datemineEncoding(resp.Body)
+	bodyReader := bufio.NewReader(resp.Body)
+	e := datemineEncoding(bodyReader)
 	utf8Reader := transform.NewReader(resp.Body, e.NewDecoder())
 	return ioutil.ReadAll(utf8Reader)
 }
@@ -31,8 +33,8 @@ func Fetch(url string) ([]byte, error) {
 /**
  * 确定html页面编码
  */
-func datemineEncoding(r io.Reader) encoding.Encoding {
-	bytes, err := bufio.NewReader(r).Peek(1024)
+func datemineEncoding(r *bufio.Reader) encoding.Encoding {
+	bytes, err := r.Peek(1024)
 	if err != nil {
 		log.Printf("Fetcher error: %v", err)
 		return unicode.UTF8
