@@ -22,9 +22,8 @@ func ParseCityList(contents []byte) engine.ParseResult {
 		result.Items = append(result.Items, "City " + string(m[2]))
 		result.Requests = append(result.Requests, engine.Request{
 			Url: string(m[1]),
-			ParseFunc: engine.NilParser,
+			ParseFunc: ParseCity,
 		})
-		fmt.Printf("City: %s, Url: %s", m[2], m[1])
 	}
 	fmt.Printf("Matches found: %d\n", len(matches))
 	return result

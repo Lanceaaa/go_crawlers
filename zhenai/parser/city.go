@@ -13,10 +13,13 @@ func ParseCity(contents []byte) engine.ParseResult {
 
 	result := engine.ParseReuslt{}
 	for _, m := range matches {
-		result.Items = append(result.Items, "user " + string(m[2]))
+		name := string(m[2])
+		result.Items = append(result.Items, "user " + name)
 		result.Requests = append(result.Requests, engine.Request{
 			Url: string(m[1]),
-			ParseFunc: engine.NilParser,
+			ParseFunc: func(c []byte) engine.ParseResult {
+				return ParseProfile(c, name)
+			},
 		})
 	}
 	return result

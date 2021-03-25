@@ -11,9 +11,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
+var rateLimiter = time.Tick(100 * time.Microsecond)
 func Fetch(url string) ([]byte, error) {
+	// 把请求进行一个限制
+	<-rateLimiter
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
