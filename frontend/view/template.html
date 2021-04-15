@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="form_action.asp" method="get">
+    <input type="text" name="name" style="width: 600px;">
+    <input type="submit" value="搜索" />
+</form>
+<h1>共为你找到相关结果为{{.Hits}}个。显示从{{.Start}}起共{{len .Items}}个。</h1>
+<table style="border-width: 1px;">
+    <tbody>
+    {{range .Items}}
+    <tr>
+        <td><a href="{{.Url}}">{{.Payload.Name}}</a></td>
+        {{with .Payload}}
+        <td>{{.Gender}}</td>
+        <td>{{.Age}}</td>
+        <td>{{.Height}}</td>
+        <td>{{.Weight}}</td>
+        <td>{{.Income}}</td>
+        <td>{{.Education}}</td>
+        <td>{{.Occupation}}</td>
+        <td>{{.Hokou}}</td>
+        <td>{{.Xinzuo}}</td>
+        <td>{{.House}}</td>
+        <td>{{.Car}}</td>
+        {{end}}
+    </tr>
+    {{else}}
+    <div>没有找到相关用户</div>
+    {{end}}
+    </tbody>
+</table>
+</body>
+</html>
