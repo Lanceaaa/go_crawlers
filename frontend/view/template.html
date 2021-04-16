@@ -5,8 +5,8 @@
     <title>Title</title>
 </head>
 <body>
-<form action="form_action.asp" method="get">
-    <input type="text" name="name" style="width: 600px;">
+<form method="get">
+    <input type="text" name="q" style="width: 600px;" value="{{.Query}}">
     <input type="submit" value="搜索" />
 </form>
 <h1>共为你找到相关结果为{{.Hits}}个。显示从{{.Start}}起共{{len .Items}}个。</h1>
@@ -34,5 +34,12 @@
     {{end}}
     </tbody>
 </table>
+<div align="middle">
+    {{.if PrevFrom ge 0}}
+    <a href="search?q={{.Query}}&from={{.PrevFrom}}">上一页</a>
+    {{end}}
+    <a href="search?q={{.Query}}&from={{.NextFrom}}">下一页</a>
+
+</div>
 </body>
 </html>

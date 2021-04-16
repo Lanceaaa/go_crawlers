@@ -6,6 +6,7 @@ import (
 	"github.com/olivere/elastic/v7"
 	"net/http"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"example.com/go-http-demo/crawler/frontend/model"
@@ -40,7 +41,7 @@ func (h SearchResultHandle) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 		from = 0
 	}
 
-	page, err = h.getSearchResult(q, from)
+	page, err := h.getSearchResult(q, from)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
@@ -51,12 +52,13 @@ func (h SearchResultHandle) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	}
 }
 
-func (h SearchResultHandle) getSearchResult(q string, from int) (model.SearchResultHandle, error) {
+func (h SearchResultHandle) getSearchResult(q string, from int) (model.SearchResult, error) {
 	var result model.SearchResult
+	result.Query = q
 	resp, err := h.client.
 		Search("dating_profile").
-		Query(elastic.NewQueryStringQuery(q)).
-		from(from).
+		Query(elastic.NewQueryStringQuery(rewriteQueryString(q))).
+		From(from).
 		Do(context.Background())
 	if err != nil {
 		return result, err
@@ -65,5 +67,13 @@ func (h SearchResultHandle) getSearchResult(q string, from int) (model.SearchRes
     result.Hits = resp.TotalHits()
     result.Start = from
     result.Items = resp.Each(reflect.TypeOf(engine.Item{}))
+    result.PrevFrom =  result.Start - len(result.Items)
+    result.NextFrom = result.Start + len(result.Items)
+
     return result, nil
+}
+
+func rewriteQueryString(q string) string {
+	re := regexp.MustCompile(`[A-Z][a-z]*:`)
+	return re.ReplaceAllString(q, "Payload:$1:")
 }
