@@ -1,4 +1,4 @@
-package persist
+package rpcclient
 
 import (
 	"context"
@@ -8,15 +8,7 @@ import (
 	"example.com/go-http-demo/crawler/engine"
 )
 
-func ItemSaver(index string) (chan engine.Item, error) {
-	// 创建elastic客户端
-	client, err := elastic.NewClient(
-		// 必须在docker中关闭嗅探
-		elastic.SetSniff(false))
-	if err != nil {
-		return nil, err
-	}
-
+func ItemSaver() (chan engine.Item, error) {
 	out := make(chan engine.Item)
 	go func() {
 		itemCount := 0
@@ -25,6 +17,7 @@ func ItemSaver(index string) (chan engine.Item, error) {
 			log.Printf("Item Saver: got item #%d: %v", itemCount, item)
 			itemCount++
 
+			// Call Rpc to save item
 			err := Save(client, item, index)
 			if err != nil {
 				log.Printf("Item Saver: error saving item %v：%v", item, err)
@@ -51,9 +44,9 @@ func Save(client *elastic.Client, item engine.Item, index string) (err error) {
 	}
 
 	_, err = indexService.
-			Do(context.Background())
+		Do(context.Background())
 
-		if err != nil {
+	if err != nil {
 		return err
 	}
 	return nil

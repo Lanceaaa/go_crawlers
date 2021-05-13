@@ -1,10 +1,13 @@
 package engine
 
-type ParseFunc func(contents []byte, url string) ParseResult
+type ParserFunc interface {
+	Parse(contents []byte, url string) ParseResult
+	Serialize() (name string, args interface{})
+}
 
 type Request struct {
 	Url string
-	ParseFunc ParseFunc
+	Parser Parser
 }
 
 type ParseResult struct {
@@ -19,6 +22,26 @@ type Item struct {
 	Payload interface{}
 }
 
-func NilParser([]byte) ParseResult {
-	return ParseResult{}
+type NilParser struct {
+	
+}
+
+type FuncParser struct {
+	parser ParserFunc
+	name string
+}
+
+func (f *FuncParser) Parse(contents []byte, url string) ParseResult {
+	f.Parse(contents, url)
+}
+
+func (f *FuncParser) Serialize() (name string, args interface{}) {
+	return f.name, nil
+}
+
+func NewFuncParser(p ParserFunc, name string) *FuncParser {
+	return &FuncParser{
+		parser: p,
+		name:   name,
+	}
 }

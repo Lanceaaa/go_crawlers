@@ -12,12 +12,14 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"example.com/go-http-demo/crawler_distribued/config"
 )
 
-var rateLimiter = time.Tick(100 * time.Microsecond)
+var rateLimiter = time.Tick(time.Second / config.Qps)
 func Fetch(url string) ([]byte, error) {
 	// 把请求进行一个限制
 	<-rateLimiter
+	log.Printf("Fetching url %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err

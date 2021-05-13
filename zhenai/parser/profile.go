@@ -21,7 +21,7 @@ var carRe = regexp.MustCompile(`<td><span class="label">是否购车：</span><s
 var guessRe = regexp.MustCompile(`<a class="exp-user-name"[^>]*href="(http://album.zhenai.com/u/([\d]+))">([^<]+)</a>`)
 var idUrlRe = regexp.MustCompile(`http://album.zhenai.com/u/([\d]+)`)
 
-func ParseProfile(contents []byte, name string, url string) engine.ParseResult {
+func parseProfile(contents []byte, name string, url string) engine.ParseResult {
 	profile = model.Profile{}
 	profile.Name = name
 	// 获取姓名
@@ -86,7 +86,7 @@ func ParseProfile(contents []byte, name string, url string) engine.ParseResult {
 	for _, m := range matches {
 		result.Requests = append(result.Requests, engine.Request{
 			Url: string(m[1]),
-			ParseFunc: ProfileParser(string(m[2])),
+			ParseFunc: NewProfileParser(string(m[2])),
 		})
 	}
 
@@ -102,8 +102,20 @@ func extractString (contents []byte, re *regexp.Regexp) string {
 	}
 }
 
-func ProfileParser (name string) engine.ParseFunc {
-	return func(c []byte, url string) engine.ParseResult {
-		return ParseProfile(c, name, url)
+type ProfileParser struct {
+	userName string
+}
+
+func (p *ProfileParser) Parse(contents []byte, url string) engine.ParseResult {
+	return parseProfile(contents, p.userName, url)
+}
+
+func (p *ProfileParser) Serialize() (name string, args interface{}) {
+	return "ProfileParser", p.userName
+}
+
+func NewProfileParser(name string) *ProfileParser {
+	return &ProfileParser{
+		userName: name,
 	}
 }
